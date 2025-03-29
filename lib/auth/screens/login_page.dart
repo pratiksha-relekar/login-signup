@@ -4,6 +4,8 @@ import '../widgets/glowing_button.dart';
 import '../widgets/animated_3d_model.dart';
 import '../widgets/social_sign_in_button.dart';
 import 'signup_page.dart';
+import '../models/user.dart';
+import 'welcome_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -58,8 +60,19 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           setState(() {
             _isLoading = false;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Login successful (Demo)')),
+          
+          // Create a user instance and navigate to welcome page
+          final user = User(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            name: _emailController.text.split('@')[0], // Using email username as name
+            email: _emailController.text,
+          );
+          
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WelcomePage(user: user),
+            ),
           );
         }
       });
@@ -71,14 +84,24 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       _isGoogleLoading = true;
     });
 
-    // Simulate Google sign-in delay
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() {
           _isGoogleLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Google sign-in successful (Demo)')),
+        
+        // Create a demo user for Google sign-in
+        final user = User(
+          id: 'google-${DateTime.now().millisecondsSinceEpoch}',
+          name: 'Google User',
+          email: 'google.user@example.com',
+        );
+        
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WelcomePage(user: user),
+          ),
         );
       }
     });
@@ -89,14 +112,24 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       _isGmailLoading = true;
     });
 
-    // Simulate Gmail sign-in delay
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() {
           _isGmailLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Gmail sign-in successful (Demo)')),
+        
+        // Create a demo user for Gmail sign-in
+        final user = User(
+          id: 'gmail-${DateTime.now().millisecondsSinceEpoch}',
+          name: 'Gmail User',
+          email: 'gmail.user@example.com',
+        );
+        
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WelcomePage(user: user),
+          ),
         );
       }
     });

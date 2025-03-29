@@ -3,6 +3,8 @@ import '../widgets/animated_input_field.dart';
 import '../widgets/glowing_button.dart';
 import '../widgets/animated_3d_model.dart';
 import '../widgets/social_sign_in_button.dart';
+import '../models/user.dart';
+import 'welcome_page.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -16,6 +18,7 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   
   bool _isLoading = false;
   bool _isGoogleLoading = false;
@@ -43,6 +46,7 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _fadeController.dispose();
     super.dispose();
   }
@@ -59,8 +63,19 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
           setState(() {
             _isLoading = false;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Signup successful (Demo)')),
+          
+          // Create a User instance with an id
+          final user = User(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            name: _nameController.text,
+            email: _emailController.text,
+          );
+          
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WelcomePage(user: user),
+            ),
           );
         }
       });
@@ -209,6 +224,24 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                               }
                               if (value.length < 6) {
                                 return 'Password must be at least 6 characters';
+                              }
+                              return null;
+                            },
+                          ),
+                          
+                          const SizedBox(height: 16),
+                          
+                          AnimatedInputField(
+                            label: 'Confirm Password',
+                            icon: Icons.lock_outline,
+                            isPassword: true,
+                            controller: _confirmPasswordController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please confirm your password';
+                              }
+                              if (value != _passwordController.text) {
+                                return 'Passwords do not match';
                               }
                               return null;
                             },

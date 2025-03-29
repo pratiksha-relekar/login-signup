@@ -61,4 +61,13 @@ class AuthService {
     
     // In a real app, clear tokens, cookies, etc.
   }
+
+  // Example of how the auth service should create users
+  User createUser({required String name, required String email}) {
+    return User(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name,
+      email: email,
+    );
+  }
 } 
