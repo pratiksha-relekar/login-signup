@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/animated_input_field.dart';
 import '../widgets/glowing_button.dart';
 import '../widgets/animated_3d_model.dart';
-import '../services/auth_service.dart';
-import 'welcome_page.dart';
+import '../widgets/social_sign_in_button.dart';
 import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -17,10 +16,10 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _authService = AuthService();
   
   bool _isLoading = false;
-  String? _errorMessage;
+  bool _isGoogleLoading = false;
+  bool _isGmailLoading = false;
   
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -47,39 +46,60 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     super.dispose();
   }
   
-  Future<void> _login() async {
+  void _login() {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
-        _errorMessage = null;
       });
       
-      try {
-        final user = await _authService.login(
-          _emailController.text,
-          _passwordController.text,
-        );
-        
-        if (!mounted) return;
-        
-        // Navigate to welcome page with fade transition
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                FadeTransition(
-              opacity: animation,
-              child: WelcomePage(user: user),
-            ),
-            transitionDuration: const Duration(milliseconds: 800),
-          ),
-        );
-      } catch (e) {
-        setState(() {
-          _errorMessage = e.toString();
-          _isLoading = false;
-        });
-      }
+      // Simulate login delay
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Login successful (Demo)')),
+          );
+        }
+      });
     }
+  }
+  
+  void _signInWithGoogle() {
+    setState(() {
+      _isGoogleLoading = true;
+    });
+
+    // Simulate Google sign-in delay
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isGoogleLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Google sign-in successful (Demo)')),
+        );
+      }
+    });
+  }
+
+  void _signInWithGmail() {
+    setState(() {
+      _isGmailLoading = true;
+    });
+
+    // Simulate Gmail sign-in delay
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isGmailLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gmail sign-in successful (Demo)')),
+        );
+      }
+    });
   }
   
   @override
@@ -187,7 +207,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                             alignment: Alignment.centerRight,
                             child: TextButton(
                               onPressed: () {
-                                // Forgot password functionality would go here
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Forgot password clicked (Demo)')),
+                                );
                               },
                               child: Text(
                                 'Forgot Password?',
@@ -198,53 +220,64 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                             ),
                           ),
                           
-                          if (_errorMessage != null)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8.0),
-                              child: Text(
-                                _errorMessage!,
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.error,
-                                ),
-                              ),
-                            ),
+                          GlowingButton(
+                            text: 'Login',
+                            isLoading: _isLoading,
+                            onPressed: _login,
+                          ),
                           
-                          _isLoading
-                              ? const CircularProgressIndicator()
-                              : GlowingButton(
-                                  text: 'LOGIN',
-                                  onPressed: _login,
-                                ),
+                          const SizedBox(height: 24),
+                          
+                          Row(
+                            children: const [
+                              Expanded(child: Divider()),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                child: Text('OR'),
+                              ),
+                              Expanded(child: Divider()),
+                            ],
+                          ),
+                          
+                          const SizedBox(height: 24),
+                          
+                          // Google Sign In Button
+                          SocialSignInButton(
+                            text: 'Continue with Google',
+                            icon: Icons.g_mobiledata,
+                            onPressed: _signInWithGoogle,
+                            isLoading: _isGoogleLoading,
+                          ),
+                          
+                          const SizedBox(height: 12),
+                          
+                          // Gmail Sign In Button
+                          SocialSignInButton(
+                            text: 'Continue with Gmail',
+                            icon: Icons.mail,
+                            onPressed: _signInWithGmail,
+                            isLoading: _isGmailLoading,
+                            buttonColor: Colors.red.shade600,
+                            iconColor: Colors.white,
+                            textColor: Colors.white,
+                          ),
                           
                           const SizedBox(height: 24),
                           
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                "Don't have an account? ",
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
+                              const Text("Don't have an account?"),
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context).push(
-                                    PageRouteBuilder(
-                                      pageBuilder: (context, animation, secondaryAnimation) =>
-                                          FadeTransition(
-                                        opacity: animation,
-                                        child: const SignupPage(),
-                                      ),
-                                      transitionDuration: const Duration(milliseconds: 500),
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const SignupPage(),
                                     ),
                                   );
                                 },
-                                child: Text(
-                                  'Sign Up',
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.secondary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                child: const Text('Sign Up'),
                               ),
                             ],
                           ),
